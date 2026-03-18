@@ -1,0 +1,53 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import compression from 'compression';
+import { AppModule } from './app.module.js';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.setGlobalPrefix('api');
+
+  app.use(helmet());
+  app.use(compression());
+
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor(),
+  );
+
+  const config = new DocumentBuilder()
+    .setTitle('Cabeleleila Leila API')
+    .setDescription('API do sistema de agendamentos do salão Cabeleleila Leila')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Application running on port ${port}`);
+}
+
+bootstrap();
