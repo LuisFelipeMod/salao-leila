@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useAppointmentsStore } from '../../stores/appointments.store'
 import { useAppointments } from '../../composables/useAppointments'
 import { useToast } from '../../composables/useToast'
-import { AppointmentStatus, ServiceStatus } from '../../types'
+import { AppointmentStatus } from '../../types'
 import type { Appointment } from '../../types'
 import AppButton from '../../components/ui/AppButton.vue'
 import AppInput from '../../components/ui/AppInput.vue'
@@ -12,7 +12,7 @@ import AppModal from '../../components/ui/AppModal.vue'
 import AppSkeleton from '../../components/ui/AppSkeleton.vue'
 
 const appointmentsStore = useAppointmentsStore()
-const { formatPrice, formatDate, formatTime, getServiceStatusLabel } = useAppointments()
+const { formatPrice, formatDate, formatTime } = useAppointments()
 const toast = useToast()
 
 const filterStatus = ref<AppointmentStatus | ''>('')
@@ -31,12 +31,6 @@ const statusOptions = [
   { value: AppointmentStatus.IN_PROGRESS, label: 'Em Andamento' },
   { value: AppointmentStatus.COMPLETED, label: 'Concluído' },
   { value: AppointmentStatus.CANCELLED, label: 'Cancelado' },
-]
-
-const serviceStatusOptions = [
-  { value: ServiceStatus.PENDING, label: 'Pendente' },
-  { value: ServiceStatus.IN_PROGRESS, label: 'Em Andamento' },
-  { value: ServiceStatus.COMPLETED, label: 'Concluído' },
 ]
 
 onMounted(() => {
@@ -105,16 +99,6 @@ async function saveEdit() {
   }
 }
 
-async function updateServiceStatus(appointmentId: string, serviceItemId: string, status: ServiceStatus) {
-  try {
-    await appointmentsStore.updateServiceStatus(appointmentId, serviceItemId, status)
-    toast.success('Status do serviço atualizado!')
-  } catch (err: unknown) {
-    const error = err as { response?: { data?: { message?: string } } }
-    toast.error(error.response?.data?.message || 'Erro ao atualizar status.')
-  }
-}
-
 function goToPage(page: number) {
   loadAppointments(page)
 }
@@ -123,8 +107,6 @@ function statusToVariant(status: string): 'pending' | 'confirmed' | 'in_progress
   return status.toLowerCase() as 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
 }
 
-// suppress unused
-void getServiceStatusLabel
 </script>
 
 <template>
@@ -211,13 +193,6 @@ void getServiceStatusLabel
                   <p class="text-sm font-medium text-gray-700 truncate">{{ item.service.name }}</p>
                   <p class="text-xs text-gray-400">{{ formatPrice(item.price) }} &middot; {{ item.service.durationMinutes }} min</p>
                 </div>
-                <select
-                  :value="item.status"
-                  class="shrink-0 text-xs px-2 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400"
-                  @change="updateServiceStatus(apt.id, item.id, ($event.target as HTMLSelectElement).value as ServiceStatus)"
-                >
-                  <option v-for="opt in serviceStatusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                </select>
               </div>
             </div>
 
