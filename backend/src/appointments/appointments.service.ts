@@ -276,7 +276,16 @@ export class AppointmentsService {
   }
 
   async checkWeekEndpoint(userId: string, date: string) {
-    return this.checkSameWeek(userId, date);
+    const result = await this.checkSameWeek(userId, date);
+    if (!result) {
+      return { hasAppointment: false };
+    }
+    return {
+      hasAppointment: true,
+      existingDate: result.existingAppointment.scheduledDate,
+      existingTime: result.existingAppointment.scheduledTime,
+      message: result.message,
+    };
   }
 
   async checkTimeConflict(
@@ -413,13 +422,23 @@ export class AppointmentsService {
     });
   }
 
-  async getWeeklyStats() {
+  async getWeeklyStats(period: 'weekly' | 'monthly' | 'total' = 'weekly') {
     const now = dayjs();
-    const weekStart = now.startOf('isoWeek').format('YYYY-MM-DD');
-    const weekEnd = now.endOf('isoWeek').format('YYYY-MM-DD');
+
+    let whereDate: object = {};
+    if (period === 'weekly') {
+      const weekStart = now.startOf('isoWeek').format('YYYY-MM-DD');
+      const weekEnd = now.endOf('isoWeek').format('YYYY-MM-DD');
+      whereDate = { scheduledDate: Between(weekStart, weekEnd) };
+    } else if (period === 'monthly') {
+      const monthStart = now.startOf('month').format('YYYY-MM-DD');
+      const monthEnd = now.endOf('month').format('YYYY-MM-DD');
+      whereDate = { scheduledDate: Between(monthStart, monthEnd) };
+    }
+    // 'total': no date filter — all appointments
 
     const appointments = await this.appointmentsRepository.find({
-      where: { scheduledDate: Between(weekStart, weekEnd) },
+      where: whereDate,
       relations: ['appointmentServices', 'appointmentServices.service'],
       select: {
         id: true,
