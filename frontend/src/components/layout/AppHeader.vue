@@ -35,11 +35,13 @@ function logout() {
   <header class="bg-white border-b border-gray-100 sticky top-0 z-40">
     <div :class="isAdminRoute ? 'px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'">
       <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-4">
+
+        <!-- Left: hamburger (admin mobile) + logo -->
+        <div class="flex items-center gap-3">
           <button
             v-if="isAdminRoute"
             @click="uiStore.toggleSidebar()"
-            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -55,6 +57,7 @@ function logout() {
           </router-link>
         </div>
 
+        <!-- Center: nav links (desktop only) -->
         <nav class="hidden md:flex items-center gap-1">
           <router-link
             v-for="link in navLinks"
@@ -71,6 +74,7 @@ function logout() {
           </router-link>
         </nav>
 
+        <!-- Right: greeting + logout -->
         <div class="flex items-center gap-3">
           <span v-if="authStore.user" class="hidden sm:block text-sm text-gray-600">
             Olá, <span class="font-semibold text-gray-800">{{ authStore.user.name.split(' ')[0] }}</span>
@@ -86,53 +90,7 @@ function logout() {
           </button>
         </div>
 
-        <!-- Mobile nav -->
-        <div class="flex md:hidden items-center">
-          <button
-            v-if="!isAdminRoute"
-            @click="uiStore.toggleSidebar()"
-            class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
-
-    <!-- Mobile menu -->
-    <Transition name="slide-down">
-      <div v-if="uiStore.sidebarOpen && !isAdminRoute" class="md:hidden border-t border-gray-100 bg-white">
-        <div class="px-4 py-3 space-y-1">
-          <router-link
-            v-for="link in navLinks"
-            :key="link.path"
-            :to="link.path"
-            @click="uiStore.closeSidebar()"
-            class="block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
-            :class="
-              route.path === link.path
-                ? 'bg-rose-50 text-rose-600'
-                : 'text-gray-600 hover:bg-gray-50'
-            "
-          >
-            {{ link.name }}
-          </router-link>
-        </div>
-      </div>
-    </Transition>
   </header>
 </template>
-
-<style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.2s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-</style>

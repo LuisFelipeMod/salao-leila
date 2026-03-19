@@ -137,7 +137,7 @@ void getServiceStatusLabel
 
     <!-- Filters -->
     <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-      <div class="flex flex-col sm:flex-row gap-3 items-end">
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
           <select
@@ -153,9 +153,9 @@ void getServiceStatusLabel
         <div class="flex-1">
           <AppInput v-model="filterClientName" label="Nome do cliente" placeholder="Buscar por nome" />
         </div>
-        <div class="flex gap-2">
-          <AppButton size="sm" @click="applyFilters">Filtrar</AppButton>
-          <AppButton size="sm" variant="ghost" @click="clearFilters">Limpar</AppButton>
+        <div class="flex gap-2 sm:flex-none">
+          <AppButton size="sm" class="flex-1 sm:flex-none" @click="applyFilters">Filtrar</AppButton>
+          <AppButton size="sm" variant="ghost" class="flex-1 sm:flex-none" @click="clearFilters">Limpar</AppButton>
         </div>
       </div>
     </div>
@@ -175,18 +175,18 @@ void getServiceStatusLabel
         :enter="{ opacity: 1, y: 0, transition: { duration: 300, delay: idx * 50 } }"
         class="bg-white rounded-2xl border border-gray-100 overflow-hidden"
       >
-        <div class="p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50/50 transition-colors" @click="toggleExpand(apt.id)">
-          <div class="flex items-center gap-4">
+        <div class="p-4 sm:p-5 flex items-center justify-between gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" @click="toggleExpand(apt.id)">
+          <div class="flex items-center gap-3 min-w-0">
             <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center shrink-0">
               <span class="text-xs font-bold text-rose-600">{{ formatTime(apt.scheduledTime) }}</span>
             </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-800">{{ apt.user?.name || 'Cliente' }}</p>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-800 truncate">{{ apt.user?.name || 'Cliente' }}</p>
               <p class="text-xs text-gray-400">{{ formatDate(apt.scheduledDate) }} &middot; {{ apt.appointmentServices.length }} serviço(s)</p>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-semibold text-gray-700">{{ formatPrice(apt.totalPrice) }}</span>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="hidden sm:inline text-sm font-semibold text-gray-700">{{ formatPrice(apt.totalPrice) }}</span>
             <AppBadge :variant="statusToVariant(apt.status)" />
             <svg
               class="w-4 h-4 text-gray-400 transition-transform"
@@ -211,20 +211,16 @@ void getServiceStatusLabel
                   <p class="text-sm font-medium text-gray-700">{{ item.service.name }}</p>
                   <p class="text-xs text-gray-400">{{ formatPrice(item.price) }} &middot; {{ item.service.durationMinutes }} min</p>
                 </div>
-                <div class="flex items-center gap-2">
-                  <select
-                    :value="item.status"
-                    @change="updateServiceStatus(apt.id, item.id, ($event.target as HTMLSelectElement).value as ServiceStatus)"
-                    class="text-xs px-2 py-1 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-1 focus:ring-rose-200"
-                  >
-                    <option v-for="opt in serviceStatusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                  </select>
-                </div>
               </div>
             </div>
 
             <div v-if="apt.notes" class="mb-4 text-sm text-gray-600">
               <span class="font-medium">Obs:</span> {{ apt.notes }}
+            </div>
+
+            <div class="flex items-center justify-between mb-3 sm:hidden">
+              <span class="text-xs text-gray-400">Total</span>
+              <span class="text-sm font-bold text-rose-600">{{ formatPrice(apt.totalPrice) }}</span>
             </div>
 
             <div class="flex gap-2">

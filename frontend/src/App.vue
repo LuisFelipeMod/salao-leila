@@ -5,6 +5,7 @@ import { useAuthStore } from './stores/auth.store'
 import AppHeader from './components/layout/AppHeader.vue'
 import AppFooter from './components/layout/AppFooter.vue'
 import AppSidebar from './components/layout/AppSidebar.vue'
+import AppBottomNav from './components/layout/AppBottomNav.vue'
 import AppToast from './components/ui/AppToast.vue'
 
 const route = useRoute()
@@ -28,20 +29,21 @@ onMounted(async () => {
     <template v-if="showLayout">
       <AppHeader />
 
-      <!-- Admin layout: sidebar + content side by side -->
+      <!-- Admin layout: sidebar + content -->
       <div v-if="isAdminRoute" class="flex flex-1">
         <AppSidebar />
-        <main class="flex-1 p-6 min-w-0">
+        <main class="flex-1 p-3 sm:p-6 min-w-0">
           <router-view />
         </main>
       </div>
 
       <!-- Client layout -->
       <template v-else>
-        <main class="flex-1">
+        <main class="flex-1 pb-16 md:pb-0">
           <router-view />
         </main>
-        <AppFooter />
+        <AppFooter class="hidden md:block" />
+        <AppBottomNav />
       </template>
     </template>
 

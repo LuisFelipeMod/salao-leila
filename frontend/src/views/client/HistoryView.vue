@@ -51,16 +51,16 @@ function goToDetail(appointment: Appointment) {
 
     <!-- Filters -->
     <div class="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-      <div class="flex flex-col sm:flex-row gap-3 items-end">
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
         <div class="flex-1">
           <AppInput v-model="startDate" label="Data inicial" type="date" />
         </div>
         <div class="flex-1">
           <AppInput v-model="endDate" label="Data final" type="date" />
         </div>
-        <div class="flex gap-2">
-          <AppButton size="sm" @click="filterAppointments">Filtrar</AppButton>
-          <AppButton size="sm" variant="ghost" @click="clearFilters">Limpar</AppButton>
+        <div class="flex gap-2 sm:flex-none">
+          <AppButton size="sm" class="flex-1 sm:flex-none" @click="filterAppointments">Filtrar</AppButton>
+          <AppButton size="sm" variant="ghost" class="flex-1 sm:flex-none" @click="clearFilters">Limpar</AppButton>
         </div>
       </div>
     </div>

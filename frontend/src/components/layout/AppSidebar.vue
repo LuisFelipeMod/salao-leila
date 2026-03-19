@@ -25,7 +25,7 @@ const links = [
 </script>
 
 <template>
-  <!-- Backdrop on mobile -->
+  <!-- Backdrop: só visível no mobile quando sidebar aberta -->
   <Transition name="fade">
     <div
       v-if="uiStore.sidebarOpen"
@@ -34,8 +34,10 @@ const links = [
     />
   </Transition>
 
+  <!-- Sidebar: drawer no mobile, fixo no desktop -->
   <aside
-    class="w-64 shrink-0 bg-white border-r border-gray-100 min-h-full"
+    class="fixed top-16 left-0 bottom-0 z-50 w-64 bg-white border-r border-gray-100 transition-transform duration-300 lg:relative lg:top-auto lg:bottom-auto lg:left-auto lg:z-auto lg:translate-x-0 lg:min-h-full"
+    :class="uiStore.sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <div class="p-4 space-y-1">
       <router-link
