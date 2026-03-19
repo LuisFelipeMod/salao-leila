@@ -112,8 +112,8 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     return updated
   }
 
-  async function fetchWeeklyStats() {
-    return await appointmentsApi.getWeeklyStats()
+  async function fetchDashboardStats(period: 'weekly' | 'monthly' | 'total' = 'weekly') {
+    return await appointmentsApi.getDashboardStats(period)
   }
 
   return {
@@ -133,6 +133,6 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     confirmAppointment,
     adminUpdate,
     updateServiceStatus,
-    fetchWeeklyStats,
+    fetchDashboardStats,
   }
 })

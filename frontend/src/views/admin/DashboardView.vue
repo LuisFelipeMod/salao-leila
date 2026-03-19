@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import type { WeeklyStats, Appointment } from '../../types'
 import { useAppointmentsStore } from '../../stores/appointments.store'
 import { useAppointments } from '../../composables/useAppointments'
@@ -9,6 +9,8 @@ import AppBadge from '../../components/ui/AppBadge.vue'
 import AppSkeleton from '../../components/ui/AppSkeleton.vue'
 import dayjs from 'dayjs'
 
+type Period = 'weekly' | 'monthly' | 'total'
+
 const appointmentsStore = useAppointmentsStore()
 const { formatPrice, formatTime } = useAppointments()
 const toast = useToast()
@@ -16,30 +18,47 @@ const toast = useToast()
 const stats = ref<WeeklyStats | null>(null)
 const todayAppointments = ref<Appointment[]>([])
 const loading = ref(true)
+const period = ref<Period>('weekly')
+
+const periodTabs: { value: Period; label: string }[] = [
+  { value: 'weekly', label: 'Semanal' },
+  { value: 'monthly', label: 'Mensal' },
+  { value: 'total', label: 'Total' },
+]
 
 const maxDayCount = computed(() => {
   if (!stats.value) return 1
   return Math.max(...stats.value.appointmentsByDay.map((d) => d.count), 1)
 })
 
+async function loadStats() {
+  loading.value = true
+  try {
+    stats.value = await appointmentsStore.fetchDashboardStats(period.value)
+  } catch {
+    toast.error('Erro ao carregar dados do dashboard.')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(async () => {
   try {
-    const [weeklyStats] = await Promise.all([
-      appointmentsStore.fetchWeeklyStats(),
+    await Promise.all([
+      loadStats(),
       appointmentsStore.fetchAll({
         startDate: dayjs().format('YYYY-MM-DD'),
         endDate: dayjs().format('YYYY-MM-DD'),
         limit: 20,
       }),
     ])
-    stats.value = weeklyStats
     todayAppointments.value = appointmentsStore.appointments
   } catch {
     toast.error('Erro ao carregar dados do dashboard.')
-  } finally {
-    loading.value = false
   }
 })
+
+watch(period, () => loadStats())
 
 function statusToVariant(status: string): 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' {
   return status.toLowerCase() as 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
@@ -82,13 +101,33 @@ const statCards = computed(() => {
     :initial="{ opacity: 0, y: 30 }"
     :enter="{ opacity: 1, y: 0, transition: { duration: 500 } }"
   >
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+    <!-- Header with period tabs -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+
+      <div class="flex bg-gray-100 rounded-xl p-1 gap-1 self-start sm:self-auto">
+        <button
+          v-for="tab in periodTabs"
+          :key="tab.value"
+          type="button"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
+          :class="
+            period === tab.value
+              ? 'bg-white text-rose-600 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          "
+          @click="period = tab.value"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+    </div>
 
     <AppSkeleton v-if="loading" type="card" :lines="4" />
 
     <template v-else>
       <!-- Stats cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <div
           v-for="(card, idx) in statCards"
           :key="card.label"
@@ -98,12 +137,12 @@ const statCards = computed(() => {
         >
           <AppCard>
             <div class="flex items-start justify-between">
-              <div>
-                <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">{{ card.label }}</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ card.value }}</p>
+              <div class="min-w-0">
+                <p class="text-xs text-gray-400 font-medium uppercase tracking-wider truncate">{{ card.label }}</p>
+                <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">{{ card.value }}</p>
               </div>
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="card.color">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0" :class="card.color">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="card.icon" />
                 </svg>
               </div>
@@ -154,18 +193,18 @@ const statCards = computed(() => {
               :key="apt.id"
               class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center shrink-0">
                   <span class="text-xs font-bold text-rose-600">{{ formatTime(apt.scheduledTime) }}</span>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-700">{{ apt.user?.name || 'Cliente' }}</p>
-                  <p class="text-xs text-gray-400">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-700 truncate">{{ apt.user?.name || 'Cliente' }}</p>
+                  <p class="text-xs text-gray-400 truncate">
                     {{ apt.appointmentServices.map(s => s.service.name).join(', ') }}
                   </p>
                 </div>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="shrink-0 ml-2">
                 <AppBadge :variant="statusToVariant(apt.status)" />
               </div>
             </div>

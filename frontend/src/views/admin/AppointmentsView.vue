@@ -205,12 +205,19 @@ void getServiceStatusLabel
               <div
                 v-for="item in apt.appointmentServices"
                 :key="item.id"
-                class="flex items-center justify-between bg-white p-3 rounded-xl"
+                class="flex items-center justify-between gap-3 bg-white p-3 rounded-xl"
               >
-                <div>
-                  <p class="text-sm font-medium text-gray-700">{{ item.service.name }}</p>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-700 truncate">{{ item.service.name }}</p>
                   <p class="text-xs text-gray-400">{{ formatPrice(item.price) }} &middot; {{ item.service.durationMinutes }} min</p>
                 </div>
+                <select
+                  :value="item.status"
+                  class="shrink-0 text-xs px-2 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400"
+                  @change="updateServiceStatus(apt.id, item.id, ($event.target as HTMLSelectElement).value as ServiceStatus)"
+                >
+                  <option v-for="opt in serviceStatusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                </select>
               </div>
             </div>
 

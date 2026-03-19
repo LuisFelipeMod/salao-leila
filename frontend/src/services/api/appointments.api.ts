@@ -27,7 +27,7 @@ export const appointmentsApi = {
     return data
   },
 
-  async checkWeek(date: string): Promise<{ hasAppointment: boolean; appointment?: Appointment }> {
+  async checkWeek(date: string): Promise<{ hasAppointment: boolean; existingDate?: string; existingTime?: string; message?: string }> {
     const { data } = await api.get('/appointments/check-week', { params: { date } })
     return data
   },
@@ -80,8 +80,8 @@ export const appointmentsApi = {
     return data
   },
 
-  async getWeeklyStats(): Promise<WeeklyStats> {
-    const { data } = await api.get('/dashboard/weekly-stats')
+  async getDashboardStats(period: 'weekly' | 'monthly' | 'total' = 'weekly'): Promise<WeeklyStats> {
+    const { data } = await api.get('/dashboard/stats', { params: { period } })
     return data
   },
 }
