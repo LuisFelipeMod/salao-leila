@@ -188,6 +188,9 @@ const steps = [
         </div>
       </div>
 
+      <!-- overflow-hidden evita que a animação x do v-motion cause scroll horizontal -->
+      <div class="overflow-hidden">
+
       <!-- Step 1: Services -->
       <div v-if="currentStep === 1"
         v-motion
@@ -295,14 +298,14 @@ const steps = [
               <div
                 v-for="service in selectedServices"
                 :key="service.id"
-                class="flex items-center justify-between"
+                class="flex items-center justify-between gap-2"
               >
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                  <span class="text-sm text-gray-700">{{ service.name }}</span>
-                  <span class="text-xs text-gray-400">({{ service.durationMinutes }} min)</span>
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                  <span class="text-sm text-gray-700 truncate">{{ service.name }}</span>
+                  <span class="text-xs text-gray-400 shrink-0">({{ service.durationMinutes }} min)</span>
                 </div>
-                <span class="text-sm font-medium text-gray-700">{{ formatPrice(service.price) }}</span>
+                <span class="text-sm font-medium text-gray-700 shrink-0">{{ formatPrice(service.price) }}</span>
               </div>
             </div>
           </div>
@@ -343,6 +346,8 @@ const steps = [
           </AppButton>
         </div>
       </div>
+
+      </div><!-- /overflow-hidden -->
     </template>
   </div>
 </template>

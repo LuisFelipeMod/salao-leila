@@ -131,16 +131,16 @@ async function handleEdit(data: { scheduledDate: string; scheduledTime: string; 
             <div
               v-for="item in appointment.appointmentServices"
               :key="item.id"
-              class="flex items-center justify-between py-2"
+              class="flex items-center justify-between gap-2 py-2"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-rose-400" />
-                <div>
-                  <p class="text-sm font-medium text-gray-700">{{ item.service.name }}</p>
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-700 truncate">{{ item.service.name }}</p>
                   <p class="text-xs text-gray-400">{{ item.service.durationMinutes }} min</p>
                 </div>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 shrink-0">
                 <span
                   class="text-xs px-2 py-0.5 rounded-full"
                   :class="{
