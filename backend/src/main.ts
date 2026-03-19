@@ -17,7 +17,13 @@ async function bootstrap() {
   app.use(compression());
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Permite localhost e qualquer IP de rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+      const allowed = !origin ||
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+        /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(origin)
+      callback(null, allowed)
+    },
     credentials: true,
   });
 
