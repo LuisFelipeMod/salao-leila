@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsArray, IsUUID, IsOptional, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, IsArray, IsUUID, IsOptional, Matches, ArrayMinSize } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAppointmentDto {
@@ -15,8 +15,8 @@ export class CreateAppointmentDto {
   scheduledTime!: string;
 
   @ApiProperty({ example: ['uuid1', 'uuid2'], type: [String] })
-  @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(1)
   @IsUUID('4', { each: true })
   serviceIds!: string[];
 
