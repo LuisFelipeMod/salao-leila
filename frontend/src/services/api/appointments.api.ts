@@ -9,7 +9,7 @@ import type {
 } from '../../types'
 
 export const appointmentsApi = {
-  async create(payload: CreateAppointmentPayload): Promise<Appointment> {
+  async create(payload: CreateAppointmentPayload): Promise<{ appointment: Appointment; suggestion?: Appointment }> {
     const { data } = await api.post('/appointments', payload)
     return data
   },
@@ -19,7 +19,7 @@ export const appointmentsApi = {
     endDate?: string
   }): Promise<Appointment[]> {
     const { data } = await api.get('/appointments/my', { params })
-    return data
+    return data.data ?? data
   },
 
   async getById(id: string): Promise<Appointment> {
@@ -33,12 +33,12 @@ export const appointmentsApi = {
   },
 
   async update(id: string, payload: UpdateAppointmentPayload): Promise<Appointment> {
-    const { data } = await api.put(`/appointments/${id}`, payload)
+    const { data } = await api.patch(`/appointments/${id}`, payload)
     return data
   },
 
   async cancel(id: string): Promise<Appointment> {
-    const { data } = await api.patch(`/appointments/${id}/cancel`)
+    const { data } = await api.delete(`/appointments/${id}`)
     return data
   },
 
@@ -52,7 +52,8 @@ export const appointmentsApi = {
     limit?: number
   }): Promise<{ data: Appointment[]; total: number; page: number; totalPages: number }> {
     const { data } = await api.get('/appointments', { params })
-    return data
+    // backend returns { data: [...], total, page, lastPage }
+    return { data: data.data ?? data, total: data.total, page: data.page, totalPages: data.lastPage }
   },
 
   async confirm(id: string): Promise<Appointment> {
@@ -64,7 +65,7 @@ export const appointmentsApi = {
     id: string,
     payload: { status?: AppointmentStatus; notes?: string }
   ): Promise<Appointment> {
-    const { data } = await api.patch(`/appointments/${id}/admin`, payload)
+    const { data } = await api.patch(`/appointments/${id}/admin-update`, payload)
     return data
   },
 
@@ -81,7 +82,7 @@ export const appointmentsApi = {
   },
 
   async getWeeklyStats(): Promise<WeeklyStats> {
-    const { data } = await api.get('/appointments/stats/weekly')
+    const { data } = await api.get('/dashboard/weekly-stats')
     return data
   },
 }

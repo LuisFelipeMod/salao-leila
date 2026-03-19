@@ -27,16 +27,22 @@ onMounted(async () => {
 
     <template v-if="showLayout">
       <AppHeader />
-      <AppSidebar v-if="isAdminRoute" />
 
-      <main
-        class="flex-1"
-        :class="isAdminRoute ? 'lg:ml-64 p-6' : ''"
-      >
-        <router-view />
-      </main>
+      <!-- Admin layout: sidebar + content side by side -->
+      <div v-if="isAdminRoute" class="flex flex-1">
+        <AppSidebar />
+        <main class="flex-1 p-6 min-w-0">
+          <router-view />
+        </main>
+      </div>
 
-      <AppFooter v-if="!isAdminRoute" />
+      <!-- Client layout -->
+      <template v-else>
+        <main class="flex-1">
+          <router-view />
+        </main>
+        <AppFooter />
+      </template>
     </template>
 
     <template v-else>

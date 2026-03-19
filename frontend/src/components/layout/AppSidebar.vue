@@ -35,8 +35,7 @@ const links = [
   </Transition>
 
   <aside
-    class="fixed top-16 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-40 transition-transform duration-300 lg:translate-x-0"
-    :class="uiStore.sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="w-64 shrink-0 bg-white border-r border-gray-100 min-h-full"
   >
     <div class="p-4 space-y-1">
       <router-link

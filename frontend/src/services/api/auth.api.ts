@@ -4,12 +4,12 @@ import type { LoginPayload, RegisterPayload, User } from '../../types'
 export const authApi = {
   async register(payload: RegisterPayload): Promise<{ user: User; token: string }> {
     const { data } = await api.post('/auth/register', payload)
-    return data
+    return { user: data.user, token: data.access_token }
   },
 
   async login(payload: LoginPayload): Promise<{ user: User; token: string }> {
     const { data } = await api.post('/auth/login', payload)
-    return data
+    return { user: data.user, token: data.access_token }
   },
 
   async getMe(): Promise<User> {

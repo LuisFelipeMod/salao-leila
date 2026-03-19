@@ -11,13 +11,13 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { ServicesService } from './services.service.js';
-import { CreateServiceDto } from './dto/create-service.dto.js';
-import { UpdateServiceDto } from './dto/update-service.dto.js';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
-import { Roles } from '../auth/decorators/roles.decorator.js';
-import { UserRole } from '../users/entities/user.entity.js';
+import { ServicesService } from './services.service';
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
 @ApiTags('Services')
 @Controller('services')

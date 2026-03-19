@@ -1,7 +1,9 @@
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole } from '../users/entities/user.entity.js';
-import { Service } from '../services/entities/service.entity.js';
+import { User, UserRole } from '../users/entities/user.entity';
+import { Service } from '../services/entities/service.entity';
+import { Appointment } from '../appointments/entities/appointment.entity';
+import { AppointmentServiceEntity } from '../appointments/entities/appointment-service.entity';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -10,7 +12,7 @@ const dataSource = new DataSource({
   username: process.env.DATABASE_USER || 'postgres',
   password: process.env.DATABASE_PASS || 'postgres',
   database: process.env.DATABASE_NAME || 'leila_db',
-  entities: [User, Service],
+  entities: [User, Service, Appointment, AppointmentServiceEntity],
   synchronize: true,
 });
 

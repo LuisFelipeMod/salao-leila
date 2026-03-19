@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { databaseConfig } from './config/database.config.js';
-import { AuthModule } from './auth/auth.module.js';
-import { UsersModule } from './users/users.module.js';
-import { ServicesModule } from './services/services.module.js';
-import { AppointmentsModule } from './appointments/appointments.module.js';
-import { DashboardModule } from './dashboard/dashboard.module.js';
+import { databaseConfig } from './config/database.config';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ServicesModule } from './services/services.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [

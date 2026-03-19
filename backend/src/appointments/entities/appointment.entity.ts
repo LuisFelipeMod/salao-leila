@@ -9,8 +9,8 @@ import {
   Index,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity.js';
-import { AppointmentServiceEntity } from './appointment-service.entity.js';
+import { User } from '../../users/entities/user.entity';
+import { AppointmentServiceEntity } from './appointment-service.entity';
 
 export enum AppointmentStatus {
   PENDING = 'PENDING',

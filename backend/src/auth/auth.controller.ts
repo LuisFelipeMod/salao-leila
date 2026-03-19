@@ -7,12 +7,17 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthService } from './auth.service.js';
-import { CreateUserDto } from '../users/dto/create-user.dto.js';
-import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { IsEmail, IsString, MinLength } from 'class-validator';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 class LoginDto {
+  @IsEmail()
   email!: string;
+
+  @IsString()
+  @MinLength(6)
   password!: string;
 }
 

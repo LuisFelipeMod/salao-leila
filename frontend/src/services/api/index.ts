@@ -16,7 +16,13 @@ api.interceptors.request.use((config) => {
 })
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Desembrulha o wrapper do TransformInterceptor: { data, statusCode, timestamp }
+    if (response.data && 'data' in response.data && 'statusCode' in response.data) {
+      response.data = response.data.data
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')

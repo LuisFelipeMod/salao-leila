@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsArray, IsUUID, IsEnum, Matches } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { AppointmentStatus } from '../entities/appointment.entity.js';
+import { AppointmentStatus } from '../entities/appointment.entity';
 
 export class UpdateAppointmentDto {
   @ApiPropertyOptional({ example: '2025-06-20' })

@@ -27,9 +27,8 @@ npm-debug.log*
 # Test coverage
 coverage/
 
-# Documentation (internal)
+# Docs internas
 .docs/
 
-# Prompts
-prompt-1.md
-prompt-inicial.md
+p-1.md
+requisitos.md

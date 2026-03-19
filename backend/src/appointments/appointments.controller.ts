@@ -12,14 +12,14 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { AppointmentsService } from './appointments.service.js';
-import { CreateAppointmentDto } from './dto/create-appointment.dto.js';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto.js';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
-import { Roles } from '../auth/decorators/roles.decorator.js';
-import { UserRole } from '../users/entities/user.entity.js';
-import { AppointmentServiceStatus } from './entities/appointment-service.entity.js';
+import { AppointmentsService } from './appointments.service';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
+import { AppointmentServiceStatus } from './entities/appointment-service.entity';
 
 interface AuthUser {
   id: string;
@@ -80,6 +80,12 @@ export class AppointmentsController {
     @Query('limit') limit = 10,
   ) {
     return this.appointmentsService.findAll(+page, +limit);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Buscar agendamento por ID' })
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.appointmentsService.findById(id);
   }
 
   @Patch(':id')

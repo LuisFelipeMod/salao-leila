@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AppointmentsService } from '../appointments/appointments.service.js';
+import { AppointmentsService } from '../appointments/appointments.service';
 
 @Injectable()
 export class DashboardService {

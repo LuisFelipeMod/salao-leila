@@ -2,11 +2,11 @@ import dayjs from 'dayjs'
 import { AppointmentStatus } from '../types'
 
 export function useAppointments() {
-  function formatPrice(value: number): string {
+  function formatPrice(value: number | string): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(value)
+    }).format(Number(value))
   }
 
   function formatDate(date: string): string {

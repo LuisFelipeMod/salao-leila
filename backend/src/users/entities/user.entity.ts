@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Appointment } from '../../appointments/entities/appointment.entity.js';
+import { Appointment } from '../../appointments/entities/appointment.entity';
 
 export enum UserRole {
   CLIENT = 'CLIENT',

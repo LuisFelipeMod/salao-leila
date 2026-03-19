@@ -7,12 +7,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import dayjs from 'dayjs';
-import isoWeek from 'dayjs/plugin/isoWeek.js';
-import { Appointment, AppointmentStatus } from './entities/appointment.entity.js';
-import { AppointmentServiceEntity, AppointmentServiceStatus } from './entities/appointment-service.entity.js';
-import { CreateAppointmentDto } from './dto/create-appointment.dto.js';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto.js';
-import { ServicesService } from '../services/services.service.js';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import { Appointment, AppointmentStatus } from './entities/appointment.entity';
+import { AppointmentServiceEntity, AppointmentServiceStatus } from './entities/appointment-service.entity';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { ServicesService } from '../services/services.service';
 
 dayjs.extend(isoWeek);
 
@@ -395,32 +395,56 @@ export class AppointmentsService {
     const weekEnd = now.endOf('isoWeek').format('YYYY-MM-DD');
 
     const appointments = await this.appointmentsRepository.find({
-      where: {
-        scheduledDate: Between(weekStart, weekEnd),
+      where: { scheduledDate: Between(weekStart, weekEnd) },
+      relations: ['appointmentServices', 'appointmentServices.service'],
+      select: {
+        id: true,
+        status: true,
+        totalPrice: true,
+        scheduledDate: true,
+        appointmentServices: { id: true, service: { id: true, name: true } },
       },
-      select: ['id', 'status', 'totalPrice', 'scheduledDate'],
     });
 
     const totalAppointments = appointments.length;
-    const confirmed = appointments.filter((a) => a.status === AppointmentStatus.CONFIRMED).length;
-    const pending = appointments.filter((a) => a.status === AppointmentStatus.PENDING).length;
-    const completed = appointments.filter((a) => a.status === AppointmentStatus.COMPLETED).length;
-    const cancelled = appointments.filter((a) => a.status === AppointmentStatus.CANCELLED).length;
-    const inProgress = appointments.filter((a) => a.status === AppointmentStatus.IN_PROGRESS).length;
+    const confirmedCount = appointments.filter((a) => a.status === AppointmentStatus.CONFIRMED).length;
+    const pendingCount = appointments.filter((a) => a.status === AppointmentStatus.PENDING).length;
     const totalRevenue = appointments
       .filter((a) => a.status !== AppointmentStatus.CANCELLED)
       .reduce((sum, a) => sum + Number(a.totalPrice), 0);
 
+    // Appointments by day of week
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const dayCounts: Record<string, number> = {};
+    for (let i = 0; i < 7; i++) {
+      dayCounts[dayNames[i]] = 0;
+    }
+    for (const apt of appointments) {
+      const dow = dayjs(apt.scheduledDate).day();
+      dayCounts[dayNames[dow]]++;
+    }
+    const appointmentsByDay = dayNames.map((day) => ({ day, count: dayCounts[day] }));
+
+    // Most requested service
+    const serviceCounts: Record<string, { name: string; count: number }> = {};
+    for (const apt of appointments) {
+      for (const as of apt.appointmentServices ?? []) {
+        const name = as.service?.name;
+        if (name) {
+          if (!serviceCounts[name]) serviceCounts[name] = { name, count: 0 };
+          serviceCounts[name].count++;
+        }
+      }
+    }
+    const mostRequestedService = Object.values(serviceCounts).sort((a, b) => b.count - a.count)[0] ?? null;
+
     return {
-      weekStart,
-      weekEnd,
       totalAppointments,
-      confirmed,
-      pending,
-      completed,
-      cancelled,
-      inProgress,
       totalRevenue,
+      confirmedCount,
+      pendingCount,
+      mostRequestedService,
+      appointmentsByDay,
     };
   }
 }

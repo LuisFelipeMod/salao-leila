@@ -32,9 +32,9 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   async function createAppointment(payload: CreateAppointmentPayload) {
     loading.value = true
     try {
-      const appointment = await appointmentsApi.create(payload)
-      appointments.value.unshift(appointment)
-      return appointment
+      const result = await appointmentsApi.create(payload)
+      appointments.value.unshift(result.appointment)
+      return result
     } finally {
       loading.value = false
     }
