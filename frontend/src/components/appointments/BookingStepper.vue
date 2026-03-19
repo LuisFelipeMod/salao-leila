@@ -20,6 +20,7 @@ const scheduledTime = ref('')
 const notes = ref('')
 const loading = ref(false)
 const weekWarning = ref('')
+const existingWeekDate = ref('')
 const bookingSuccess = ref(false)
 const slideDirection = ref<'left' | 'right'>('left')
 
@@ -63,9 +64,14 @@ async function goToStep(step: number) {
   if (step === 3 && scheduledDate.value) {
     try {
       weekWarning.value = ''
+      existingWeekDate.value = ''
       const result = await appointmentsStore.checkWeek(scheduledDate.value)
-      if (result.hasAppointment) {
-        weekWarning.value = 'Você já possui um agendamento nesta semana. Você pode continuar, mas fique atento(a) aos horários.'
+      if (result.hasAppointment && result.existingDate) {
+        existingWeekDate.value = result.existingDate
+        const formatted = new Date(result.existingDate + 'T12:00').toLocaleDateString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long',
+        })
+        weekWarning.value = `Você já possui um agendamento nesta semana (${formatted}). Que tal agendar seus serviços na mesma data?`
       }
     } catch {
       // Non-blocking, just skip the check
@@ -99,6 +105,14 @@ async function confirmBooking() {
   }
 }
 
+function useExistingDate() {
+  scheduledDate.value = existingWeekDate.value
+  scheduledTime.value = ''
+  weekWarning.value = ''
+  existingWeekDate.value = ''
+  currentStep.value = 2
+}
+
 function resetBooking() {
   currentStep.value = 1
   selectedServiceIds.value = []
@@ -106,6 +120,7 @@ function resetBooking() {
   scheduledTime.value = ''
   notes.value = ''
   weekWarning.value = ''
+  existingWeekDate.value = ''
   bookingSuccess.value = false
 }
 
@@ -284,11 +299,29 @@ const steps = [
         <p class="text-sm text-gray-500 mb-6">Revise os detalhes antes de confirmar</p>
 
         <!-- Week warning -->
-        <div v-if="weekWarning" class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-          </svg>
-          <p class="text-sm text-amber-700">{{ weekWarning }}</p>
+        <div v-if="weekWarning" class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+            <p class="text-sm text-amber-700">{{ weekWarning }}</p>
+          </div>
+          <div v-if="existingWeekDate" class="mt-3 flex gap-2">
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+              @click="useExistingDate"
+            >
+              Usar esta data
+            </button>
+            <button
+              type="button"
+              class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+              @click="weekWarning = ''; existingWeekDate = ''"
+            >
+              Manter data escolhida
+            </button>
+          </div>
         </div>
 
         <div class="bg-gray-50 rounded-2xl p-5 space-y-4">
