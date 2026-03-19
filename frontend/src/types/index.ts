@@ -34,7 +34,7 @@ export interface SalonService {
   id: string
   name: string
   description: string
-  price: number
+  price: number | string
   durationMinutes: number
   isActive: boolean
 }
@@ -44,7 +44,7 @@ export interface AppointmentServiceItem {
   serviceId: string
   service: SalonService
   status: ServiceStatus
-  price: number
+  price: number | string
 }
 
 export interface Appointment {

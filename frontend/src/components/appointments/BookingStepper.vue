@@ -37,7 +37,7 @@ const selectedServices = computed(() =>
 )
 
 const totalPrice = computed(() =>
-  selectedServices.value.reduce((sum, s) => sum + s.price, 0)
+  selectedServices.value.reduce((sum, s) => sum + Number(s.price), 0)
 )
 
 const totalDuration = computed(() =>
