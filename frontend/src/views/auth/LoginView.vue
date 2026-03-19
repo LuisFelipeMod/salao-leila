@@ -37,7 +37,7 @@ async function handleSubmit() {
     } else {
       router.push('/')
     }
-    toast.success('Bem-vinda de volta!')
+    toast.success('Bem-vindo(a) de volta!')
   } catch (err: unknown) {
     const error = err as { response?: { data?: { message?: string } } }
     toast.error(error.response?.data?.message || 'E-mail ou senha incorretos.')
