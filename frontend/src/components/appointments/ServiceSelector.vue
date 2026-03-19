@@ -33,7 +33,7 @@ function isSelected(id: string) {
 const totalPrice = computed(() => {
   return props.services
     .filter((s) => props.modelValue.includes(s.id))
-    .reduce((sum, s) => sum + s.price, 0)
+    .reduce((sum, s) => sum + Number(s.price), 0)
 })
 
 const totalDuration = computed(() => {
