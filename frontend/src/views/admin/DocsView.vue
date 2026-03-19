@@ -91,7 +91,7 @@ const sections = [
       com parâmetros, tipos de resposta e exemplos de payloads. É possível testar as rotas
       diretamente pelo navegador após autenticar com o token JWT.
     `,
-    link: { href: '/api/docs', label: 'Abrir Swagger UI' },
+    link: { href: 'http://localhost:3000/api/docs', label: 'Abrir Swagger UI' },
   },
 ]
 </script>
