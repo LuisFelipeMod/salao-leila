@@ -3,9 +3,10 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In } from 'typeorm';
+import { Repository, Between, In, Not } from 'typeorm';
 import { paginate } from '../common/utils/pagination';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -14,6 +15,7 @@ import { AppointmentServiceEntity, AppointmentServiceStatus } from './entities/a
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { ServicesService } from '../services/services.service';
+import { Service } from '../services/entities/service.entity';
 
 dayjs.extend(isoWeek);
 
@@ -34,8 +36,10 @@ export class AppointmentsService {
     }
 
     const totalPrice = services.reduce((sum, s) => sum + Number(s.price), 0);
+    const totalDuration = services.reduce((sum, s) => sum + s.durationMinutes, 0);
 
-    // Check same-week appointment
+    await this.checkTimeConflict(dto.scheduledDate, dto.scheduledTime, totalDuration);
+
     const weekSuggestion = await this.checkSameWeek(userId, dto.scheduledDate);
 
     const appointment = this.appointmentsRepository.create({
@@ -44,6 +48,7 @@ export class AppointmentsService {
       scheduledTime: dto.scheduledTime,
       notes: dto.notes || null,
       totalPrice,
+      totalDuration,
       status: AppointmentStatus.PENDING,
     });
 
@@ -80,6 +85,7 @@ export class AppointmentsService {
         status: true,
         notes: true,
         totalPrice: true,
+        totalDuration: true,
         createdAt: true,
         updatedAt: true,
         user: {
@@ -127,6 +133,7 @@ export class AppointmentsService {
         'appointment.status',
         'appointment.notes',
         'appointment.totalPrice',
+        'appointment.totalDuration',
         'appointment.createdAt',
         'as.id',
         'as.serviceId',
@@ -165,6 +172,7 @@ export class AppointmentsService {
         status: true,
         notes: true,
         totalPrice: true,
+        totalDuration: true,
         createdAt: true,
         updatedAt: true,
         user: {
@@ -271,6 +279,36 @@ export class AppointmentsService {
     return this.checkSameWeek(userId, date);
   }
 
+  async checkTimeConflict(
+    scheduledDate: string,
+    scheduledTime: string,
+    totalDuration: number,
+    excludeId?: string,
+  ): Promise<void> {
+    const existing = await this.appointmentsRepository.find({
+      where: {
+        scheduledDate,
+        status: Not(AppointmentStatus.CANCELLED),
+        ...(excludeId ? { id: Not(excludeId) } : {}),
+      },
+      select: ['id', 'scheduledTime', 'totalDuration'],
+    });
+
+    const newStart = this.timeToMinutes(scheduledTime);
+    const newEnd = newStart + totalDuration;
+
+    for (const apt of existing) {
+      const existingStart = this.timeToMinutes(apt.scheduledTime);
+      const existingEnd = existingStart + apt.totalDuration;
+
+      if (newStart < existingEnd && newEnd > existingStart) {
+        throw new ConflictException(
+          `Horário indisponível. Já existe um agendamento às ${apt.scheduledTime} com duração de ${apt.totalDuration} minutos neste dia.`,
+        );
+      }
+    }
+  }
+
   private checkTwoDayRule(scheduledDate: string) {
     const now = dayjs();
     const scheduled = dayjs(scheduledDate);
@@ -283,31 +321,42 @@ export class AppointmentsService {
     }
   }
 
-  private async applyUpdate(appointment: Appointment, dto: UpdateAppointmentDto) {
-    if (dto.scheduledDate) {
-      appointment.scheduledDate = dto.scheduledDate;
-    }
-    if (dto.scheduledTime) {
-      appointment.scheduledTime = dto.scheduledTime;
-    }
-    if (dto.notes !== undefined) {
-      appointment.notes = dto.notes || null;
-    }
-    if (dto.status) {
-      appointment.status = dto.status;
-    }
+  private timeToMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
 
+  private async applyUpdate(appointment: Appointment, dto: UpdateAppointmentDto) {
+    if (dto.scheduledDate) appointment.scheduledDate = dto.scheduledDate;
+    if (dto.scheduledTime) appointment.scheduledTime = dto.scheduledTime;
+    if (dto.notes !== undefined) appointment.notes = dto.notes || null;
+    if (dto.status) appointment.status = dto.status;
+
+    let updatedServices: Service[] | null = null;
     if (dto.serviceIds && dto.serviceIds.length > 0) {
-      const services = await this.servicesService.findByIds(dto.serviceIds);
-      if (services.length !== dto.serviceIds.length) {
+      updatedServices = await this.servicesService.findByIds(dto.serviceIds);
+      if (updatedServices.length !== dto.serviceIds.length) {
         throw new BadRequestException('Um ou mais serviços não foram encontrados ou estão inativos');
       }
+    }
 
-      // Remove old services
+    // Re-check time conflict whenever date, time, or services changed
+    if (dto.scheduledDate || dto.scheduledTime || updatedServices) {
+      const duration = updatedServices
+        ? updatedServices.reduce((sum, s) => sum + s.durationMinutes, 0)
+        : appointment.totalDuration;
+      await this.checkTimeConflict(
+        appointment.scheduledDate,
+        appointment.scheduledTime,
+        duration,
+        appointment.id,
+      );
+    }
+
+    if (updatedServices) {
       await this.appointmentServicesRepository.delete({ appointmentId: appointment.id });
 
-      // Add new ones
-      const newAppointmentServices = services.map((service) =>
+      const newAppointmentServices = updatedServices.map((service) =>
         this.appointmentServicesRepository.create({
           appointmentId: appointment.id,
           serviceId: service.id,
@@ -318,7 +367,8 @@ export class AppointmentsService {
 
       await this.appointmentServicesRepository.save(newAppointmentServices);
 
-      appointment.totalPrice = services.reduce((sum, s) => sum + Number(s.price), 0);
+      appointment.totalPrice = updatedServices.reduce((sum, s) => sum + Number(s.price), 0);
+      appointment.totalDuration = updatedServices.reduce((sum, s) => sum + s.durationMinutes, 0);
     }
 
     await this.appointmentsRepository.save(appointment);
@@ -339,6 +389,7 @@ export class AppointmentsService {
         status: true,
         notes: true,
         totalPrice: true,
+        totalDuration: true,
         createdAt: true,
         user: {
           id: true,
