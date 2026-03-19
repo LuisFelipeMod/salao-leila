@@ -17,7 +17,7 @@ async function bootstrap() {
   app.use(compression());
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow: boolean) => void) => {
       // Permite localhost e qualquer IP de rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
       const allowed = !origin ||
         /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
