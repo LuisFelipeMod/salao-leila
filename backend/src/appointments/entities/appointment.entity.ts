@@ -50,6 +50,9 @@ export class Appointment {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalPrice!: number;
 
+  @Column({ type: 'int', default: 0 })
+  totalDuration!: number;
+
   @CreateDateColumn()
   createdAt!: Date;
 
