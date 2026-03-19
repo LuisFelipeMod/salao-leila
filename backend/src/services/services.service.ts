@@ -4,6 +4,7 @@ import { Repository, In } from 'typeorm';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { paginate } from '../common/utils/pagination';
 
 @Injectable()
 export class ServicesService {
@@ -26,12 +27,7 @@ export class ServicesService {
       order: { name: 'ASC' },
     });
 
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
+    return paginate(data, total, page, limit);
   }
 
   async findById(id: string): Promise<Service> {

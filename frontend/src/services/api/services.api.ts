@@ -4,8 +4,7 @@ import type { SalonService } from '../../types'
 export const servicesApi = {
   async getServices(): Promise<SalonService[]> {
     const { data } = await api.get('/services')
-    // backend returns { data: [...], total, page, lastPage }
-    return data.data ?? data
+    return data.data
   },
 
   async createService(payload: {

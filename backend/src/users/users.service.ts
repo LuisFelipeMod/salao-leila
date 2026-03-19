@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import { paginate } from '../common/utils/pagination';
 
 interface CreateUserData {
   name: string;
@@ -45,11 +46,6 @@ export class UsersService {
       order: { createdAt: 'DESC' },
     });
 
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
+    return paginate(data, total, page, limit);
   }
 }

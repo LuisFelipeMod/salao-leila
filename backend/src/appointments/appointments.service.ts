@@ -5,7 +5,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
+import { paginate } from '../common/utils/pagination';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { Appointment, AppointmentStatus } from './entities/appointment.entity';
@@ -150,13 +151,7 @@ export class AppointmentsService {
       .take(limit);
 
     const [data, total] = await qb.getManyAndCount();
-
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
+    return paginate(data, total, page, limit);
   }
 
   async findAll(page = 1, limit = 10) {
@@ -195,12 +190,7 @@ export class AppointmentsService {
       take: limit,
     });
 
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
+    return paginate(data, total, page, limit);
   }
 
   async updateByClient(id: string, userId: string, dto: UpdateAppointmentDto) {
@@ -244,7 +234,7 @@ export class AppointmentsService {
   ) {
     const appointmentService = await this.appointmentServicesRepository.findOne({
       where: { id: appointmentServiceId, appointmentId },
-      select: ['id', 'appointmentId', 'serviceId', 'status', 'price'],
+      select: ['id', 'status'],
     });
 
     if (!appointmentService) {
@@ -264,29 +254,12 @@ export class AppointmentsService {
       where: {
         userId,
         scheduledDate: Between(weekStart, weekEnd),
-        status: AppointmentStatus.PENDING,
+        status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
       },
       select: ['id', 'scheduledDate', 'scheduledTime', 'status'],
     });
 
-    if (!existing) {
-      // Also check CONFIRMED
-      const confirmed = await this.appointmentsRepository.findOne({
-        where: {
-          userId,
-          scheduledDate: Between(weekStart, weekEnd),
-          status: AppointmentStatus.CONFIRMED,
-        },
-        select: ['id', 'scheduledDate', 'scheduledTime', 'status'],
-      });
-      if (confirmed) {
-        return {
-          message: 'Você já possui um agendamento nesta semana',
-          existingAppointment: confirmed,
-        };
-      }
-      return null;
-    }
+    if (!existing) return null;
 
     return {
       message: 'Você já possui um agendamento nesta semana',
@@ -406,28 +379,20 @@ export class AppointmentsService {
       },
     });
 
-    const totalAppointments = appointments.length;
-    const confirmedCount = appointments.filter((a) => a.status === AppointmentStatus.CONFIRMED).length;
-    const pendingCount = appointments.filter((a) => a.status === AppointmentStatus.PENDING).length;
-    const totalRevenue = appointments
-      .filter((a) => a.status !== AppointmentStatus.CANCELLED)
-      .reduce((sum, a) => sum + Number(a.totalPrice), 0);
-
-    // Appointments by day of week
     const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const dayCounts: Record<string, number> = {};
-    for (let i = 0; i < 7; i++) {
-      dayCounts[dayNames[i]] = 0;
-    }
-    for (const apt of appointments) {
-      const dow = dayjs(apt.scheduledDate).day();
-      dayCounts[dayNames[dow]]++;
-    }
-    const appointmentsByDay = dayNames.map((day) => ({ day, count: dayCounts[day] }));
-
-    // Most requested service
+    const dayCounts: Record<string, number> = Object.fromEntries(dayNames.map((d) => [d, 0]));
     const serviceCounts: Record<string, { name: string; count: number }> = {};
+    let confirmedCount = 0;
+    let pendingCount = 0;
+    let totalRevenue = 0;
+
     for (const apt of appointments) {
+      if (apt.status === AppointmentStatus.CONFIRMED) confirmedCount++;
+      if (apt.status === AppointmentStatus.PENDING) pendingCount++;
+      if (apt.status !== AppointmentStatus.CANCELLED) totalRevenue += Number(apt.totalPrice);
+
+      dayCounts[dayNames[dayjs(apt.scheduledDate).day()]]++;
+
       for (const as of apt.appointmentServices ?? []) {
         const name = as.service?.name;
         if (name) {
@@ -436,6 +401,9 @@ export class AppointmentsService {
         }
       }
     }
+
+    const totalAppointments = appointments.length;
+    const appointmentsByDay = dayNames.map((day) => ({ day, count: dayCounts[day] }));
     const mostRequestedService = Object.values(serviceCounts).sort((a, b) => b.count - a.count)[0] ?? null;
 
     return {

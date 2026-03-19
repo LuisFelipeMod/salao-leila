@@ -19,7 +19,7 @@ export const appointmentsApi = {
     endDate?: string
   }): Promise<Appointment[]> {
     const { data } = await api.get('/appointments/my', { params })
-    return data.data ?? data
+    return data.data
   },
 
   async getById(id: string): Promise<Appointment> {
@@ -52,8 +52,7 @@ export const appointmentsApi = {
     limit?: number
   }): Promise<{ data: Appointment[]; total: number; page: number; totalPages: number }> {
     const { data } = await api.get('/appointments', { params })
-    // backend returns { data: [...], total, page, lastPage }
-    return { data: data.data ?? data, total: data.total, page: data.page, totalPages: data.lastPage }
+    return { data: data.data, total: data.total, page: data.page, totalPages: data.lastPage }
   },
 
   async confirm(id: string): Promise<Appointment> {
