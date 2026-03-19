@@ -82,20 +82,6 @@ A interface foi projetada com foco em mobile, garantindo uma experiência fluíd
 
 <img src="public/mobile-print.png" alt="Tela inicial mobile do app" width="280" />
 
-### Cliente (mobile)
-- **Bottom navigation bar** fixo no rodapé com três abas: **Início**, **Agendar** (botão FAB rose elevado com `-mt-5`) e **Histórico** — padrão de navegação nativo de apps mobile
-- Footer oculto no mobile (`hidden md:block`); área principal com `pb-16` para não ser coberta pela bottom nav
-- Stepper de agendamento com animações `v-motion` contidas em `overflow-hidden` para evitar scroll horizontal
-- Nomes de serviços longos com `truncate` + `min-w-0` para nunca quebrar o layout em telas estreitas
-- Inputs de data e grade de horários adaptados para toque
-
-### Admin (mobile)
-- **Sidebar como drawer deslizante**: `fixed` com `translate-x-0 / -translate-x-full` controlado por `uiStore.sidebarOpen`; backdrop com fade ao abrir; volta a `lg:relative` no desktop
-- Hamburger `md:hidden` no header do admin abre o drawer
-- Dashboard: stat cards em grid **2 colunas** no mobile, 4 no desktop
-- Agendamentos: preço oculto na linha (`hidden sm:inline`) e exibido no painel expandido; botões de filtro `flex-1` (full-width) no mobile
-- Padding da main: `p-3 sm:p-6` para aproveitar melhor o espaço em telas pequenas
-
 ## Funcionalidades
 
 ### Módulo Cliente
