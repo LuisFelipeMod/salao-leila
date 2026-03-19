@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -14,10 +14,10 @@ import { UserRole } from '../users/entities/user.entity';
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
-  @Get('weekly-stats')
-  @ApiOperation({ summary: 'Métricas semanais (admin)' })
-  async getWeeklyStats() {
-    return this.dashboardService.getWeeklyStats();
+  @Get('stats')
+  @ApiOperation({ summary: 'Métricas do dashboard (admin) — period: weekly | monthly | total' })
+  async getStats(@Query('period') period: 'weekly' | 'monthly' | 'total' = 'weekly') {
+    return this.dashboardService.getStats(period);
   }
 
   @Get('today')

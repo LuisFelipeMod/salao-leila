@@ -5,8 +5,8 @@ import { AppointmentsService } from '../appointments/appointments.service';
 export class DashboardService {
   constructor(private appointmentsService: AppointmentsService) {}
 
-  async getWeeklyStats() {
-    return this.appointmentsService.getWeeklyStats();
+  async getStats(period: 'weekly' | 'monthly' | 'total' = 'weekly') {
+    return this.appointmentsService.getWeeklyStats(period);
   }
 
   async getTodayAppointments() {
