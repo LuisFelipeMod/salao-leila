@@ -1,67 +1,50 @@
-# Salão de Beleza Leila - Sistema de Agendamento
+# Salão de Beleza Leila — Sistema de Agendamento
 
-Sistema web completo de agendamento para o salão de beleza da Leila, com módulo de clientes e painel administrativo.
+Aplicação web fullstack de agendamento para salão de beleza, com módulo do cliente e painel administrativo completo.
 
-## Tecnologias
+## Estrutura do Repositório
 
-### Back-end
-- **NestJS** v11 — arquitetura modular
-- **TypeORM** v0.3 + **PostgreSQL**
-- **Passport + JWT** — autenticação
-- **class-validator / class-transformer** — validação e DTOs
-- **Swagger** — documentação da API
-- **Helmet, Compression, Rate Limiting** — segurança e performance
+```
+cabeleleila-leila/
+├── backend/          # API REST — NestJS + TypeORM + PostgreSQL
+├── frontend/         # SPA — Vue 3 + Pinia + Tailwind CSS
+└── expose-wsl2.ps1   # Script para expor portas WSL2 na rede local (Windows)
+```
 
-### Front-end
-- **Vue.js 3** — Composition API + `<script setup>`
-- **Pinia** — gerenciamento de estado
-- **Vue Router 4** — navegação com guards
-- **Axios** — requisições HTTP
-- **Tailwind CSS 4** — estilização
-- **@vueuse/motion** — animações
-- **Day.js** — manipulação de datas
+## Stack Tecnológica
 
-## Pré-requisitos
-
-- Node.js >= 18
-- PostgreSQL >= 14
-- npm >= 9
+| Camada | Tecnologia |
+|--------|-----------|
+| Backend | NestJS 11, TypeORM 0.3, PostgreSQL 15+ |
+| Autenticação | Passport.js + JWT |
+| Validação | class-validator + class-transformer |
+| Documentação API | Swagger / OpenAPI (`/api/docs`) |
+| Segurança | Helmet, Rate Limiting, bcrypt (rounds 12) |
+| Frontend | Vue 3 (Composition API, `<script setup>`) |
+| Estado | Pinia |
+| Roteamento | Vue Router 4 (com guards de autenticação) |
+| Estilização | Tailwind CSS 4 |
+| HTTP Client | Axios (com interceptors JWT e unwrap automático) |
+| Animações | @vueuse/motion |
+| Testes | Jest — 39 unitários + 31 E2E (sem banco de dados) |
 
 ## Instalação e Execução
 
-### 1. Banco de Dados
+### Pré-requisitos
+- Node.js 20+
+- PostgreSQL 15+
 
-Crie o banco PostgreSQL:
-
-```sql
-CREATE DATABASE leila_db;
-```
-
-### 2. Back-end
+### Backend
 
 ```bash
 cd backend
-cp .env.example .env   # edite se necessário
+cp .env.example .env   # configure as variáveis abaixo
 npm install
-npm run seed           # popula o banco com dados iniciais
-npm run start:dev      # inicia em http://localhost:3000
+npm run seed           # cria admin, cliente teste e 8 serviços
+npm run start:dev      # porta 3000
 ```
 
-A documentação da API estará em: http://localhost:3000/api/docs
-
-### 3. Front-end
-
-```bash
-cd frontend
-cp .env .env.local     # edite se necessário
-npm install
-npm run dev            # inicia em http://localhost:5173
-```
-
-## Variáveis de Ambiente
-
-### Back-end (`backend/.env`)
-
+**Variáveis de ambiente** (`backend/.env`):
 ```
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
@@ -73,71 +56,99 @@ JWT_EXPIRES_IN=7d
 PORT=3000
 ```
 
-### Front-end (`frontend/.env`)
+### Frontend
 
+```bash
+cd frontend
+npm install
+npm run dev            # porta 5173
+```
+
+**Variável de ambiente** (`frontend/.env`):
 ```
 VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
-## Usuários de Teste
+### Credenciais de Teste (após seed)
 
-| Tipo   | E-mail             | Senha       |
-|--------|-------------------|-------------|
-| Admin  | admin@leila.com   | Admin@123   |
-| Cliente| cliente@teste.com | Cliente@123 |
+| Papel | E-mail | Senha |
+|-------|--------|-------|
+| Admin | admin@leila.com | Admin@123 |
+| Cliente | cliente@teste.com | Cliente@123 |
 
 ## Funcionalidades
 
 ### Módulo Cliente
 - Cadastro e login com JWT
-- Agendamento com seleção de serviços, data e horário (stepper de 3 passos)
-- Sugestão inteligente de mesma semana (se já há agendamento na semana)
-- Alteração de agendamento (apenas se faltam mais de 2 dias)
-- Histórico de agendamentos com filtro por período
-- Detalhes do agendamento com status individual dos serviços
+- Agendamento em 3 etapas: seleção de serviços → data e horário → confirmação
+- Sugestão automática de agendar na mesma data quando já existe agendamento na semana
+- Edição e cancelamento de agendamentos (regra dos 2 dias de antecedência)
+- Histórico de agendamentos com filtros por período
+- Visualização detalhada com status de cada serviço
 
 ### Módulo Admin
-- Painel operacional com listagem, filtros e ações
-- Confirmação de agendamentos
-- Alteração de agendamentos sem restrição de prazo
-- Gerenciamento de status individual de cada serviço
-- Dashboard com métricas semanais, receita, serviço mais solicitado
-- CRUD de serviços do salão
+- **Dashboard** com métricas filtráveis por período (Semanal / Mensal / Total): total de agendamentos, receita, confirmados, pendentes, distribuição por dia da semana e serviço mais procurado
+- **Agendamentos**: listagem paginada com filtros por status, data e nome do cliente; confirmação e edição de status/observações
+- **Serviços**: CRUD completo do catálogo de serviços (nome, descrição, preço, duração)
+- **Documentação interna** em `/admin/docs`: guia completo das funcionalidades, regras de negócio e status disponíveis
+- **Swagger UI** em `/api/docs`: documentação interativa da API REST
 
-### Segurança
-- JWT com guards de autenticação e autorização por role
-- Validação server-side com class-validator em todos os endpoints
-- Validação client-side antes de enviar ao servidor
-- Rate limiting (100 req/min por IP)
-- Helmet + Compression + CORS
+## Regras de Negócio
 
-### UX
-- Animações em todas as views e interações (Motion.js)
-- Loading states com skeleton loaders
-- Toast notifications animadas
-- Design responsivo com paleta rose/dourado
+| Regra | Descrição |
+|-------|-----------|
+| Conflito de horários | Impede sobreposições comparando janelas de tempo (horário + duração total dos serviços) |
+| Snapshot de preços | Preço gravado no momento do agendamento; alterações no catálogo não o afetam |
+| Regra dos 2 dias | Clientes só podem editar/cancelar com mais de 2 dias de antecedência |
+| Sugestão de semana | Se já há agendamento na semana, sugere agendar na mesma data para otimizar o atendimento |
+| Duração total | Calculada automaticamente pela soma dos serviços; usada na verificação de conflito |
+
+## Segurança
+
+- **JWT** com guards de autenticação e autorização por role (`CLIENT` / `ADMIN`)
+- **Rate limiting**: 100 requisições por minuto por IP
+- **Helmet**: headers HTTP de segurança em todas as respostas
+- **bcrypt**: senhas com salt de 12 rounds
+- **Validação** server-side com class-validator em todos os DTOs (400 com detalhes em caso de erro)
+- **CORS** configurado para aceitar origens locais (desenvolvimento) e rede interna
+
+## Testes
+
+```bash
+cd backend
+npm test            # 39 testes unitários (AppointmentsService, AuthService, ServicesService, paginate)
+npm run test:e2e    # 31 testes E2E com pipeline NestJS real e service mocked (sem banco de dados)
+```
 
 ## Arquitetura
 
 ```
-cabeleleila-leila/
-├── backend/          # API NestJS
-│   └── src/
-│       ├── auth/           # Autenticação JWT + guards
-│       ├── users/          # Gestão de usuários
-│       ├── services/       # Serviços do salão
-│       ├── appointments/   # Agendamentos + regras de negócio
-│       ├── dashboard/      # Métricas e relatórios
-│       ├── common/         # Filters, interceptors, pipes
-│       ├── config/         # Configuração do banco
-│       └── seed/           # Seed de dados iniciais
-├── frontend/         # SPA Vue.js
-│   └── src/
-│       ├── components/     # UI, layout, appointments
-│       ├── views/          # Client, admin, auth views
-│       ├── stores/         # Pinia stores
-│       ├── composables/    # Hooks reutilizáveis
-│       ├── services/api/   # Camada de comunicação com API
-│       ├── router/         # Vue Router com guards
-│       └── types/          # TypeScript interfaces
+backend/src/
+├── auth/           # Login, registro, JWT strategy, guards de role
+├── users/          # Entidade User, CRUD
+├── services/       # Catálogo de serviços do salão
+├── appointments/   # Agendamentos, regras de negócio, conflito de horários
+├── dashboard/      # Métricas e estatísticas para o admin
+├── common/         # Exception filter, transform interceptor, paginate util
+├── config/         # Configuração TypeORM
+└── seed/           # Dados iniciais
+
+frontend/src/
+├── components/     # UI (AppButton, AppInput, AppModal…), layout, appointments
+├── views/          # auth/, client/, admin/ (incluindo DocsView)
+├── stores/         # Pinia: auth, appointments, services, ui
+├── composables/    # useAppointments, useToast, useAnimations
+├── services/api/   # Camada HTTP: auth.api, appointments.api, services.api
+├── router/         # Rotas com guards de autenticação e role
+└── types/          # Interfaces TypeScript compartilhadas
 ```
+
+## Acesso por Rede Local (WSL2)
+
+Execute o script como Administrador no PowerShell do Windows:
+
+```powershell
+.\expose-wsl2.ps1
+```
+
+O script detecta o IP do WSL2, configura `netsh portproxy` para as portas 3000 e 5173 e cria as regras no Windows Firewall automaticamente.
