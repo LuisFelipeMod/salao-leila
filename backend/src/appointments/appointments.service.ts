@@ -239,11 +239,11 @@ export class AppointmentsService {
 
   async updateServiceStatus(
     appointmentId: string,
-    serviceId: string,
+    appointmentServiceId: string,
     status: AppointmentServiceStatus,
   ) {
     const appointmentService = await this.appointmentServicesRepository.findOne({
-      where: { appointmentId, serviceId },
+      where: { id: appointmentServiceId, appointmentId },
       select: ['id', 'appointmentId', 'serviceId', 'status', 'price'],
     });
 
