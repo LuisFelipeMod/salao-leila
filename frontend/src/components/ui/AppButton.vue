@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Props {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
@@ -28,12 +30,12 @@ const sizeClasses: Record<string, string> = {
   lg: 'px-7 py-3 text-base',
 }
 
-const classes = [
+const classes = computed(() => [
   'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 btn-hover-scale',
   variantClasses[props.variant],
   sizeClasses[props.size],
   (props.disabled || props.loading) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
-].join(' ')
+].join(' '))
 </script>
 
 <template>
