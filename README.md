@@ -148,13 +148,3 @@ frontend/src/
 ├── router/         # Rotas com guards de autenticação e role
 └── types/          # Interfaces TypeScript compartilhadas
 ```
-
-## Acesso por Rede Local (WSL2)
-
-Execute o script como Administrador no PowerShell do Windows:
-
-```powershell
-.\expose-wsl2.ps1
-```
-
-O script detecta o IP do WSL2, configura `netsh portproxy` para as portas 3000 e 5173 e cria as regras no Windows Firewall automaticamente.
