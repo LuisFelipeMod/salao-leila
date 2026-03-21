@@ -2,13 +2,23 @@
 
 Aplicação web fullstack de agendamento para salão de beleza, com módulo do cliente e painel administrativo completo.
 
+## Produção
+
+A aplicação está disponível em: **https://salao-leila.up.railway.app/**
+
+| Recurso | URL |
+|---------|-----|
+| Aplicação | https://salao-leila.up.railway.app/ |
+| API | https://salao-leila.up.railway.app/api |
+| Swagger | https://salao-leila.up.railway.app/api/docs |
+
 ## Estrutura do Repositório
 
 ```
 cabeleleila-leila/
 ├── backend/          # API REST — NestJS + TypeORM + PostgreSQL
 ├── frontend/         # SPA — Vue 3 + Pinia + Tailwind CSS
-└── expose-wsl2.ps1   # Script para expor portas WSL2 na rede local (Windows)
+└── Dockerfile        # Build multi-stage (frontend + backend) para produção
 ```
 
 ## Stack Tecnológica
