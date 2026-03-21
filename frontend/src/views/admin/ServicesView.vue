@@ -23,6 +23,25 @@ const formDuration = ref('')
 const formErrors = ref<Record<string, string>>({})
 const saveLoading = ref(false)
 
+function formatCurrencyInput(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return ''
+  const cents = parseInt(digits, 10)
+  return (cents / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+function parseCurrencyToNumber(value: string): number {
+  if (!value) return 0
+  return parseFloat(value.replace(/\./g, '').replace(',', '.'))
+}
+
+function onPriceInput(val: string) {
+  formPrice.value = formatCurrencyInput(val)
+}
+
 onMounted(() => {
   servicesStore.fetchServices()
 })
@@ -41,7 +60,7 @@ function openEditModal(service: SalonService) {
   editingService.value = service
   formName.value = service.name
   formDescription.value = service.description
-  formPrice.value = service.price.toString()
+  formPrice.value = Number(service.price).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   formDuration.value = service.durationMinutes.toString()
   formErrors.value = {}
   showModal.value = true
@@ -51,7 +70,7 @@ function validate(): boolean {
   formErrors.value = {}
   if (!formName.value.trim()) formErrors.value.name = 'Nome é obrigatório'
   if (!formDescription.value.trim()) formErrors.value.description = 'Descrição é obrigatória'
-  if (!formPrice.value || Number(formPrice.value) <= 0) formErrors.value.price = 'Preço deve ser maior que zero'
+  if (!formPrice.value || parseCurrencyToNumber(formPrice.value) <= 0) formErrors.value.price = 'Preço deve ser maior que zero'
   if (!formDuration.value || Number(formDuration.value) <= 0) formErrors.value.duration = 'Duração deve ser maior que zero'
   return Object.keys(formErrors.value).length === 0
 }
@@ -64,7 +83,7 @@ async function handleSave() {
     const payload = {
       name: formName.value,
       description: formDescription.value,
-      price: Number(formPrice.value),
+      price: parseCurrencyToNumber(formPrice.value),
       durationMinutes: Number(formDuration.value),
     }
 
@@ -202,10 +221,10 @@ async function deleteService(service: SalonService) {
           :error="formErrors.description"
         />
         <AppInput
-          v-model="formPrice"
+          :modelValue="formPrice"
+          @update:modelValue="onPriceInput"
           label="Preço (R$)"
-          type="number"
-          placeholder="0.00"
+          placeholder="0,00"
           :error="formErrors.price"
         />
         <AppInput
