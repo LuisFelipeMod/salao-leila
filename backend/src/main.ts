@@ -18,11 +18,13 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow: boolean) => void) => {
-      // Permite localhost e qualquer IP de rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+      const corsOrigin = process.env.CORS_ORIGIN;
+      // Permite localhost, IPs de rede local e a origem configurada via env (produção)
       const allowed = !origin ||
         /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
-        /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(origin)
-      callback(null, allowed)
+        /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(origin) ||
+        (corsOrigin !== undefined && origin === corsOrigin);
+      callback(null, !!allowed);
     },
     credentials: true,
   });
