@@ -44,16 +44,19 @@ cabeleleila-leila/
 - Node.js 20+
 - PostgreSQL 15+ (o serviço deve estar rodando antes de executar os comandos abaixo)
 
-> **Iniciando o PostgreSQL:**
+> **Iniciando o PostgreSQL e criando o banco:**
 > ```bash
 > # Linux (WSL / Ubuntu)
 > sudo service postgresql start
+> sudo -u postgres psql -c "CREATE DATABASE leila_db;"
 >
 > # macOS (Homebrew)
 > brew services start postgresql
+> psql postgres -c "CREATE DATABASE leila_db;"
 >
 > # Docker
 > docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
+> docker exec -it postgres psql -U postgres -c "CREATE DATABASE leila_db;"
 > ```
 
 ### Backend
