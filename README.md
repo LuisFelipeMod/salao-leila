@@ -50,6 +50,7 @@ cabeleleila-leila/
 cd backend
 cp .env.example .env   # configure as variáveis abaixo
 npm install
+npm run migration:run  # cria as tabelas no banco de dados
 npm run seed           # cria admin, cliente teste e 8 serviços
 npm run start:dev      # porta 3000
 ```
