@@ -42,7 +42,19 @@ cabeleleila-leila/
 
 ### Pré-requisitos
 - Node.js 20+
-- PostgreSQL 15+
+- PostgreSQL 15+ (o serviço deve estar rodando antes de executar os comandos abaixo)
+
+> **Iniciando o PostgreSQL:**
+> ```bash
+> # Linux (WSL / Ubuntu)
+> sudo service postgresql start
+>
+> # macOS (Homebrew)
+> brew services start postgresql
+>
+> # Docker
+> docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
+> ```
 
 ### Backend
 
