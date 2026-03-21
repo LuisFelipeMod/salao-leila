@@ -46,6 +46,10 @@ cabeleleila-leila/
 
 > **Iniciando o PostgreSQL e criando o banco:**
 > ```bash
+> # Docker (Ideal)
+> docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
+> docker exec -it postgres psql -U postgres -c "CREATE DATABASE leila_db;"
+>
 > # Linux (WSL / Ubuntu)
 > sudo service postgresql start
 > sudo -u postgres psql -c "CREATE DATABASE leila_db;"
@@ -53,10 +57,6 @@ cabeleleila-leila/
 > # macOS (Homebrew)
 > brew services start postgresql
 > psql postgres -c "CREATE DATABASE leila_db;"
->
-> # Docker
-> docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
-> docker exec -it postgres psql -U postgres -c "CREATE DATABASE leila_db;"
 > ```
 
 ### Backend
