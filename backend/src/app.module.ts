@@ -15,7 +15,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
-      exclude: ['/api/(.*)'],
+      exclude: ['/api*'],
     }),
     TypeOrmModule.forRoot(databaseConfig()),
     ThrottlerModule.forRoot([
