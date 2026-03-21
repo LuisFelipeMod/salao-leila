@@ -13,7 +13,7 @@ const dataSource = new DataSource({
   password: process.env.DATABASE_PASS || 'postgres',
   database: process.env.DATABASE_NAME || 'leila_db',
   entities: [User, Service, Appointment, AppointmentServiceEntity],
-  synchronize: true,
+  synchronize: false,
 });
 
 async function seed() {

@@ -8,5 +8,5 @@ export const databaseConfig = (): TypeOrmModuleOptions => ({
   password: process.env.DATABASE_PASS || 'postgres',
   database: process.env.DATABASE_NAME || 'leila_db',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: true,
+  synchronize: false,
 });

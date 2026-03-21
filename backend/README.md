@@ -7,7 +7,7 @@ API REST construída com NestJS, TypeORM e PostgreSQL. Expõe todos os endpoints
 | Biblioteca | Uso |
 |-----------|-----|
 | NestJS 11 | Framework principal — módulos, controllers, services, guards |
-| TypeORM 0.3 | ORM com `synchronize: true` (auto-migration em dev) |
+| TypeORM 0.3 | ORM com migrations versionadas (`src/migrations/`) |
 | PostgreSQL 15+ | Banco de dados relacional |
 | Passport.js + passport-jwt | Estratégia JWT para autenticação |
 | passport-local | Estratégia local (email + senha) para login |
@@ -56,12 +56,42 @@ src/
     └── seed.ts           # Admin + cliente teste + 8 serviços
 ```
 
+## Pré-requisito: PostgreSQL
+
+O banco precisa estar em execução antes de qualquer comando da aplicação.
+
+**Opção 1 — Docker (recomendado)**
+```bash
+docker run -d \
+  --name leila_db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=leila_db \
+  -p 5432:5432 \
+  postgres:15
+```
+
+**Opção 2 — PostgreSQL nativo**
+```bash
+sudo apt install postgresql -y      # Caso o seu sistema operacional seja Debian/Ubuntu
+sudo service postgresql start
+sudo -u postgres psql -c "CREATE DATABASE leila_db;"
+```
+
+**Opção 3 — PostgreSQL nativo (macOS)**
+```bash
+brew install postgresql@15
+brew services start postgresql@15
+createdb leila_db
+```
+
 ## Como Rodar
 
 ```bash
 npm install
 cp .env.example .env    # configure as variáveis
-npm run seed            # popula o banco
+npm run migration:run   # cria as tabelas no banco
+npm run seed            # popula o banco com dados iniciais
 npm run start:dev       # porta 3000, hot reload
 npm run build           # build de produção
 npm run start:prod      # executa o build
