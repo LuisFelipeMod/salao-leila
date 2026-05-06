@@ -2,6 +2,16 @@
 
 Aplicação web fullstack de agendamento para salão de beleza, com módulo do cliente e painel administrativo completo.
 
+## Produção
+
+A aplicação está disponível em: **https://salao-leila.up.railway.app/**
+
+| Recurso | URL |
+|---------|-----|
+| Aplicação | https://salao-leila.up.railway.app/ |
+| API | https://salao-leila.up.railway.app/api |
+| Swagger | https://salao-leila.up.railway.app/api/docs |
+
 ## Estrutura do Repositório
 
 ```
